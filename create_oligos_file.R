@@ -55,7 +55,7 @@ sheet_number_partial <- 6 # change to specific sheet number for the partial plat
 partial_plate <- read_excel("./PCR plate setup submission1.xlsx", # change to given file name
                             sheet = sheet_number_partial, 
                             col_names = FALSE,
-                            range = "B5:E12") # adjust this range specifically for partial plate
+                            range = "B5:E12") # adjust this range specifically for partial plate (MUST BE FULL COLUMNS)
 
 # convert to data frame and unlist to a vector
 partial_plate <- data.frame(Sample_ID = unlist(partial_plate, use.names = FALSE))
