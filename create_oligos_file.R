@@ -19,12 +19,13 @@ library(readxl)
 stacked_plate_list <- list()
 
 # number of sheets you want to do 
-# (note: this will do the full sheets starting at 1 and up to this number, for 
-# specific plates or partial plates see below)
-sheets_number <- 5
+# give the first sheet and last sheet, the loop below will create a stacked
+# list of all sheets bettwen (and including) these.
+first_sheet <- 7
+last_sheet <- 11
 
 # loop over each sheet, saving each cell name to a stacked list
-for (i in 1:sheets_number) {
+for (i in first_sheet:last_sheet) {
   # read the sheet
   plate <- read_excel("./PCR plate setup submission1.xlsx", # change to given file name
                       sheet = i, col_names = FALSE,
@@ -83,8 +84,7 @@ plate6_stacked <- data.frame(sample_id = plate6_stacked)
 forward_primer <- "ACTGGGATTAGATACCCC"
 reverse_primer <- "TAGAACAGGCTCCTCTAG"
 
-# total number of plates (adjust as needed)
-total_plate_number <- 6 
+plate_range <- c(1:6) # set this to the range of your plates numbers
 
 
 #--------------
@@ -94,10 +94,10 @@ total_plate_number <- 6
 i7_primer_list <- read_excel("./Corrected eDNA metabarcoding genomic and index primers 112221.xlsx", 
                              sheet = 2, 
                              col_names = FALSE,
-                             range = paste0("C2:C", total_plate_number + 1)) # accounts for specific # of plates
+                             range = paste0("C2:C", max(plate_range) + 1)) # starts at C2 so need to add 1
 
 # add the i7 primer indices to each of the plate data frames
-for (i in 1:total_plate_number) {
+for (i in plate_range) { # change to range of your plate numbers
   # get each plate
   plate_df <- get(paste0("plate", i, "_stacked"))
   # add primer column 
@@ -122,7 +122,7 @@ i5_primer_list <- read_excel("./Corrected eDNA metabarcoding genomic and index p
                              range = "B2:B97")
 
 # add the i5 primer indices to each of the plate data frames
-for (i in 1:total_plate_number) {
+for (i in plate_range) { 
   # get each plate
   plate_df <- get(paste0("plate", i, "_stacked"))
   # get number of rows to account for partial plate
@@ -142,13 +142,17 @@ head(plate1_stacked) # can check all plates if you want
 #--------------
 # final data organization
 
-# combine all samples into single dataframe
-oligos_df <- bind_rows(plate1_stacked,
-                       plate2_stacked,
-                       plate3_stacked,
-                       plate4_stacked,
-                       plate5_stacked,
-                       plate6_stacked) # add or remove plates depending on your data
+# initialize oligos data frame
+oligos_df <- data.frame()
+
+# bind each plate to the the data frame
+for (i in plate_range) {
+  plate_name <- paste0("plate",i,"_stacked") # plate for each iteration
+  # get data frame for each name
+  plate_df <- get(plate_name)
+  # bind each plate df to each other in oligos df
+  oligos_df <- bind_rows(oligos_df, plate_df)
+}
 
 # add primer and barcode indicator column
 oligos_df <- oligos_df %>%
@@ -162,6 +166,15 @@ colnames(oligos_df)[4] <- "12S"
 
 # check data frame
 head(oligos_df)
+
+
+# ------ OPTIONAL -------
+# If you want to add something such as "_R" to the end of your sample names, for
+# example in the case of using replicate samples, can do so here
+
+#for (i in 1:nrow(oligos_df)) {
+  #oligos_df[i,4] <- paste0(oligos_df[i,4], "_R")
+#}
 
 
 #-----------------
