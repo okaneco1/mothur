@@ -5,7 +5,6 @@
 library(tidyverse)
 library(readxl)
 
-
 # The example provided for this script was performed with 6 total PCR plates.
 # The first 5 plates were full, and the 6th was a partial plate that ranged from
 # B5 to E12. Be sure to adjust parameters according to your own data.
