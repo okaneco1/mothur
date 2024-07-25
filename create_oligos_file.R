@@ -19,10 +19,10 @@ library(readxl)
 stacked_plate_list <- list()
 
 # number of sheets you want to do 
-# give the first sheet and last sheet, the loop below will create a stacked
-# list of all sheets bettwen (and including) these.
-first_sheet <- 7
-last_sheet <- 11
+# give the first FULL sheet and last FULL sheet, the loop below will create a 
+# stacked list of all sheets between (and including) these.
+first_sheet <- 1
+last_sheet <- 5
 
 # loop over each sheet, saving each cell name to a stacked list
 for (i in first_sheet:last_sheet) {
@@ -50,26 +50,28 @@ list2env(stacked_plate_list, envir = .GlobalEnv)
 #--------------------------------------------------
 # can skip if no partial plates
 
-sheet_number_partial <- 6 # change to specific sheet number for the partial plate
+sheet_number_partial <- 12 # change to specific sheet number for the partial plate
 
 # read the partial plate data from the given sheet
 partial_plate <- read_excel("./PCR plate setup submission1.xlsx", # change to given file name
                             sheet = sheet_number_partial, 
                             col_names = FALSE,
                             range = "B5:E12") # adjust this range specifically for partial plate (MUST BE FULL COLUMNS)
+# Note: RANGE MUST BE FULL COLUMNS. End with "12" (eg. C12, D12, E12) even if 
+# final column is only partially filled with samples on the data sheet
 
 # convert to data frame and unlist to a vector
 partial_plate <- data.frame(Sample_ID = unlist(partial_plate, use.names = FALSE))
 
 # this will likely give some empty cells, so remove those if necessary
 tail(partial_plate) # check the end for empty values
-partial_plate_filtered <- partial_plate[partial_plate$Sample_ID != "–", ] 
+partial_plate_filtered <- partial_plate[!is.na(partial_plate$Sample_ID), ] # empty cells must be blank
 
 # name the variable based on the sheet number
 assign(paste0("plate", sheet_number_partial, "_stacked"), partial_plate_filtered)
 
-# convert to df (change plate # to your specific plate)
-plate6_stacked <- data.frame(sample_id = plate6_stacked)
+# SET NAME TO PROPER PLATE NUMBER
+plate7_stacked <- data.frame(sample_id = unlist(partial_plate_filtered))
 
 # if you have multiple partial plates, can then repeat this step to additional
 # partial plates. Be sure to change the variable named of the stacked df to correspond
@@ -84,7 +86,7 @@ plate6_stacked <- data.frame(sample_id = plate6_stacked)
 forward_primer <- "ACTGGGATTAGATACCCC"
 reverse_primer <- "TAGAACAGGCTCCTCTAG"
 
-plate_range <- c(1:6) # set this to the range of your plates numbers
+plate_range <- c(7:12) # set this to the range of your plates numbers
 
 
 #--------------
@@ -97,7 +99,7 @@ i7_primer_list <- read_excel("./Corrected eDNA metabarcoding genomic and index p
                              range = paste0("C2:C", max(plate_range) + 1)) # starts at C2 so need to add 1
 
 # add the i7 primer indices to each of the plate data frames
-for (i in plate_range) { # change to range of your plate numbers
+for (i in plate_range) { 
   # get each plate
   plate_df <- get(paste0("plate", i, "_stacked"))
   # add primer column 
@@ -110,7 +112,7 @@ for (i in plate_range) { # change to range of your plate numbers
 }
 
 # stacked plate lists should now include i7 column:
-head(plate1_stacked) # can check all plates if you want
+head(plate7_stacked) # can check all plates if you want
 
 #--------------
 # add the i5 index primer to each plate list
@@ -137,7 +139,7 @@ for (i in plate_range) {
 }
 
 # stacked plate lists should now include i5 column:
-head(plate1_stacked) # can check all plates if you want
+head(plate7_stacked) # can check all plates if you want
 
 #--------------
 # final data organization
@@ -171,6 +173,8 @@ head(oligos_df)
 # ------ OPTIONAL -------
 # If you want to add something such as "_R" to the end of your sample names, for
 # example in the case of using replicate samples, can do so here
+
+# this example specifically adds "_R" to every sample name (remove # to activate lines)
 
 #for (i in 1:nrow(oligos_df)) {
   #oligos_df[i,4] <- paste0(oligos_df[i,4], "_R")
