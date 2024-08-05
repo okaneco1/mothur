@@ -91,11 +91,15 @@ plate_range <- c(7:12) # set this to the range of your plates numbers
 #--------------
 # add the i7 index primer to each plate list
 
+# set the range of i7 numbers used for plates (i.e. vial labels numbers)
+# may be the same as "plate_range" but also may differ
+i7_range <- c(1:7)
+
 # make i7 list
 i7_primer_list <- read_excel("./Corrected eDNA metabarcoding genomic and index primers 112221.xlsx", 
                              sheet = 2, 
                              col_names = FALSE,
-                             range = paste0("C2:C", max(plate_range) + 1)) # starts at C2 so need to add 1
+                             range = paste0("C", min(i7_range) + 1, ":C", max(i7_range) + 1)) # starts at C2 so need to add 1
 
 # add the i7 primer indices to each of the plate data frames
 for (i in plate_range) { 
