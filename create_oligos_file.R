@@ -192,5 +192,3 @@ write.table(oligos_df,
             quote = FALSE, # no quotes added 
             row.names = FALSE, # row names are not kept
             col.names = TRUE) # column names are kept
-
-
